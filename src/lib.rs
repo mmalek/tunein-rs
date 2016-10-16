@@ -1,10 +1,54 @@
 extern crate xml;
 use std::io::Read;
+use std::error::Error as StdError;
 
-// pub struct Reader<R: Read>
-// {
-//     reader: xml::reader::EventReader<R>
-// }
+struct Reader<R: Read>
+{
+    reader: xml::reader::EventReader<R>,
+    path : Vec<Node>,
+}
+
+enum Event
+{
+    StartDocument{version: u8},
+    EndDocument,
+    StartHead,
+    EndHead,
+    StartBody,
+    EndBody,
+    Title(String),
+    Status(Option<u32>),
+    StartOutlineGroup{text: String, key: String},
+    EndOutlineGroup,
+    Link(Link),
+    Audio(Audio),
+}
+
+#[derive(Debug, PartialEq)]
+enum Node
+{
+    Opml,
+    Head,
+    Title,
+    Status,
+    Body,
+    Outline{is_group: bool},
+}
+
+impl Node
+{
+    fn get_name(&self) -> &'static str
+    {
+        match *self {
+            Node::Opml => { "opml" }
+            Node::Head => { "head" }
+            Node::Title => { "title" }
+            Node::Status => { "status" }
+            Node::Body => { "body" }
+            Node::Outline{..} => { "outline" }
+        }
+    }
+}
 
 #[derive(Debug, PartialEq)]
 pub struct Document
@@ -25,7 +69,7 @@ pub struct Version
 pub struct Head
 {
     pub title : String,
-    pub status : u32,
+    pub status : Option<u32>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -54,6 +98,7 @@ pub struct Audio {
 #[derive(Debug, PartialEq)]
 pub enum Outline
 {
+    Group{text: String, key: String, outlines: Vec<Outline>},
     Link(Link),
     Audio(Audio),
 }
@@ -85,7 +130,7 @@ impl Head
 {
     pub fn new() -> Head
     {
-        Head{title: String::new(), status: 0}
+        Head{title: String::new(), status: None}
     }
 }
 
@@ -118,47 +163,62 @@ impl Audio
     }
 }
 
-// impl<R: Read> Reader<R>
-// {
-//     pub fn new(source: R) -> Reader<R>
-//     {
-//         Reader{reader: xml::reader::EventReader::new(source)}
-//     }
-    
-//     pub fn next(&mut self) -> Result<Event, xml::reader::Error>
-//     {
-//         self.reader.next().and_then(|event| {
-//             match event
-//             {
-//                 xml::reader::XmlEvent::StartElement(ref name, ref attr, _) => if name.local_name == "opml"{ Event::Link{text: "aa", url: "bb", key: "cc"} } else {},
-//                 _ => {}
-//             }
-//         });
-//     }
-// }
+#[derive(Debug)]
+pub struct Error
+{
+    description : String,
+}
 
-pub fn parse<R: Read>(source: R) -> Document {
-    
-    let mut document = Document::new();
-    
-    // let reader = Reader::new(source);
-    let mut reader = xml::reader::EventReader::new(source);
-    
-    loop {
-        if let Ok(event) = reader.next() {
-            match event
+pub type Result<T> = std::result::Result<T, Error>;
+
+fn map_err(e: xml::reader::Error) -> Error
+{
+    Error{description: e.description().to_string()}
+}
+
+impl<R: Read> Reader<R>
+{
+    pub fn new(source: R) -> Reader<R>
+    {
+        Reader{reader: xml::reader::EventReader::new(source), path: vec![]}
+    }
+
+    pub fn next(&mut self) -> Result<Event>
+    {
+        let mut content = String::new();
+        loop
+        {
+            match try!(self.reader.next().map_err(map_err))
             {
                 xml::reader::XmlEvent::StartElement{ref name, ref attributes, ..} => {
                     match &name.local_name as &str {
+                        "head" => {
+                            self.path.push(Node::Head);
+                            return Ok(Event::StartHead);
+                        }
+                        "body" => {
+                            self.path.push(Node::Body);
+                            return Ok(Event::StartBody);
+                        }
+                        "title" => {
+                            self.path.push(Node::Title);
+                        }
+                        "status" => {
+                            self.path.push(Node::Status);
+                        }
                         "opml" => {
                             if let Some(version) = attributes.iter().find(|ref attr| attr.name.local_name == "version").and_then(|v| v.value.parse::<u8>().ok()) {
-                                document.version.major = version;
+                                self.path.push(Node::Opml);
+                                return Ok(Event::StartDocument{version: version});
+                            } else {
+                                return Err(Error{description: "Invalid version format".to_string()});
                             }
                         }
                         "outline" => {
-                            if let Some(otype) = attributes.iter().find(|ref attr| attr.name.local_name == "type") {
-                                if otype.value == "link" {
-                                    let mut link = Link::new(); 
+                            if let Some(outline_type) = attributes.iter().find(|ref attr| attr.name.local_name == "type") {
+                                self.path.push(Node::Outline{is_group: false});
+                                if outline_type.value == "link" {
+                                    let mut link = Link::new();
                                     for attr in attributes {
                                         match &attr.name.local_name as &str {
                                             "text" => link.text = attr.value.clone(),
@@ -167,10 +227,10 @@ pub fn parse<R: Read>(source: R) -> Document {
                                             _ => {}
                                         }
                                     }
-                                    document.outlines.push(Outline::Link(link));
+                                    return Ok(Event::Link(link));
                                 }
-                                else if otype.value == "audio" {
-                                    let mut audio = Audio::new(); 
+                                else if outline_type.value == "audio" {
+                                    let mut audio = Audio::new();
                                     for attr in attributes {
                                         match &attr.name.local_name as &str {
                                             "text" => audio.text = attr.value.clone(),
@@ -181,7 +241,7 @@ pub fn parse<R: Read>(source: R) -> Document {
                                             "formats" => {
                                                 audio.format = match &attr.value as &str {
                                                     "mp3" => Format::MP3,
-                                                    _ => Format::Unknown, 
+                                                    _ => Format::Unknown,
                                                 }
                                             }
                                             "item" => audio.item = attr.value.clone(),
@@ -193,22 +253,109 @@ pub fn parse<R: Read>(source: R) -> Document {
                                             _ => {}
                                         }
                                     }
-                                    document.outlines.push(Outline::Audio(audio));
+                                    return Ok(Event::Audio(audio));
+                                } else {
+                                    return Err(Error{description: "Invalid outline type".to_string()});
                                 }
+                            } else {
+                                self.path.push(Node::Outline{is_group: true});
+                                return Ok(Event::StartOutlineGroup{
+                                    text: attributes.iter().find(|attr| attr.name.local_name == "text").map_or(String::new(), |attr| attr.value.clone()),
+                                    key: attributes.iter().find(|attr| attr.name.local_name == "key").map_or(String::new(), |attr| attr.value.clone()),
+                                });
                             }
                         }
-                        _ => {}
+                        _ => { return Err(Error{description: "Unexpected element".to_string()}); }
                     }
                 }
-                xml::reader::XmlEvent::EndDocument => { break; }
+                xml::reader::XmlEvent::Characters(s) => { content = s; }
+                xml::reader::XmlEvent::EndElement{ref name} => {
+                    if self.path.last().and_then(|node| Some(node.get_name())) == Some(&name.local_name) {
+                        if let Some(node) = self.path.pop() {
+                            match node {
+                                Node::Opml => { return Ok(Event::EndDocument); }
+                                Node::Head => { return Ok(Event::EndHead); }
+                                Node::Title => { return Ok(Event::Title(content.drain(..).collect::<String>())); }
+                                Node::Status => { return Ok(Event::Status(content.drain(..).collect::<String>().parse().ok())); }
+                                Node::Body => { return Ok(Event::EndBody); }
+                                Node::Outline{is_group: true} => { return Ok(Event::EndOutlineGroup); }
+                                Node::Outline{is_group: false} => {}
+                            }
+                        }
+                    }
+                }
+                xml::reader::XmlEvent::EndDocument => {
+                    if !self.path.is_empty() {
+                        return Err(Error{description: "Unexpected end of the document".to_string()});
+                    }
+                }
                 _ => {}
             }
         }
-        else {
-            break;
-        }
     }
-    
-    return document;
 }
 
+pub fn parse<R: Read>(source: R) -> Result<Document>  {
+
+    let mut document = Document::new();
+
+    let mut reader = Reader::new(source);
+
+    let mut outline_groups: Vec<Vec<Outline>> = vec![];
+
+    loop {
+        match try!(reader.next())
+        {
+            Event::StartDocument{version} => {
+                document.version.major = version;
+                outline_groups.push(vec![]);
+                println!("Start document");
+            },
+            Event::EndDocument => {
+                println!("End document");
+                if let Some(outlines) = outline_groups.pop() {
+                    document.outlines = outlines;
+                }
+                break;
+            },
+            Event::Title(title) => {
+                document.head.title = title;
+            },
+            Event::Status(status) => {
+                document.head.status = status;
+            },
+            Event::Link(link) => {
+                if let Some(ref mut outlines) = outline_groups.last_mut() {
+                    println!("Got link: {:?}", &link);
+                    outlines.push(Outline::Link(link));
+                }
+            },
+            Event::Audio(audio) => {
+                println!("Before audio");
+                if let Some(ref mut outlines) = outline_groups.last_mut() {
+                    outlines.push(Outline::Audio(audio));
+                }
+            },
+            Event::StartOutlineGroup{text, key} => {
+                println!("Before new outline group");
+                if let Some(ref mut outlines) = outline_groups.last_mut() {
+                    outlines.push(Outline::Group{text: text, key: key, outlines: vec![]});
+                }
+                outline_groups.push(vec![]);
+            },
+            Event::EndOutlineGroup => {
+                println!("Before end outline group");
+                if let Some(ref mut children) = outline_groups.pop() {
+                    match outline_groups.last_mut().and_then(|o| o.last_mut()) {
+                        Some(&mut Outline::Group{ref mut outlines, ..}) => { outlines.append(children); }
+                        Some(_) => {}
+                        None => { return Err(Error{description: "End/start elements doesn't match".to_string()}); }
+                    }
+                }
+            },
+            _ => {},
+        }
+    }
+
+    return Ok(document);
+}
