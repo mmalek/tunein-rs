@@ -1,5 +1,5 @@
 [package]
-name = "opml"
+name = "opml-rs"
 version = "0.1.0"
 authors = ["Michał Małek <michalm@fastmail.fm>"]
 
