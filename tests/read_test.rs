@@ -1,6 +1,7 @@
 
 extern crate opml;
-    use std::fs::File;
+use std::fs::File;
+use std::io;
 
 #[cfg(test)]
 
@@ -17,6 +18,11 @@ fn make_link(text: &str, url: &str, key: &str) -> opml::Outline
 fn make_audio(text: &str, subtext: &str, url: &str, bitrate: u16, reliability: u16, format: opml::Format, item: &str, image: &str, guide_id: &str, genre_id: &str, now_playing_id: &str, preset_id: &str) -> opml::Outline
 {
     opml::Outline::Audio(opml::Audio{text: text.to_string(), subtext: subtext.to_string(), url: url.to_string(), bitrate: bitrate, reliability: reliability, format: format, item: item.to_string(), image: image.to_string(), guide_id: guide_id.to_string(), genre_id: genre_id.to_string(), now_playing_id: now_playing_id.to_string(), preset_id: preset_id.to_string()})
+}
+
+#[test]
+fn empty() {
+    assert!(opml::reader::read(io::empty()).is_err());
 }
 
 #[test]
@@ -54,4 +60,16 @@ fn sample_2() {
         ]
     };
     assert_eq!(document, expected_document);
+}
+
+#[test]
+fn broken_1() {
+    let input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><opml version=\"1\"><head>".as_bytes();
+    assert!(opml::reader::read(input).is_err());
+}
+
+#[test]
+fn minimal_ok() {
+    let input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><opml version=\"1\"></opml>".as_bytes();
+    assert!(opml::reader::read(input).is_ok());
 }
