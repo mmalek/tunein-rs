@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <opml version="1">
 	<head>
-	<title>Kraków</title>
-	<status>300</status>
-
+		<title>Kraków</title>
+		<status>300</status>
 	</head>
 	<body>
-<outline text="Stacje" key="stations">
-<outline type="audio" text="Anty Radio 101.3 (Rock)" URL="http://opml.radiotime.com/Tune.ashx?id=s76368" bitrate="96" reliability="10" guide_id="s76368" subtext="Rockowo Bezkompromisowi" genre_id="g19" formats="mp3" item="station" image="http://cdn-radiotime-logos.tunein.com/s9608q.png" now_playing_id="s76368" preset_id="s76368"/>
-<outline type="audio" text="KRK.FM 102.4 (Top 40-Pop)" URL="http://opml.radiotime.com/Tune.ashx?id=s16527" bitrate="128" reliability="10" guide_id="s16527" subtext="Polska" genre_id="g61" formats="mp3" item="station" image="http://cdn-radiotime-logos.tunein.com/s16527q.png" now_playing_id="s16527" preset_id="s16527"/>
-<outline type="audio" text="PR R Krakow Nowy Sacz 90.0 (Rock)" URL="http://opml.radiotime.com/Tune.ashx?id=s103067" bitrate="32" reliability="85" guide_id="s103067" subtext="Polska" genre_id="g19" formats="mp3" item="station" image="http://cdn-radiotime-logos.tunein.com/s103064q.png" now_playing_id="s103067" preset_id="s103067"/>
-<outline type="audio" text="PR R Krakow Tarnow 101.0 (Rock)" URL="http://opml.radiotime.com/Tune.ashx?id=s103069" bitrate="32" reliability="100" guide_id="s103069" subtext="Polska" genre_id="g19" formats="mp3" item="station" image="http://cdn-radiotime-logos.tunein.com/s103064q.png" now_playing_id="s103069" preset_id="s103069"/>
-</outline>
+		<outline text="Stacje" key="stations">
+		<outline type="audio" text="Anty Radio 101.3 (Rock)" URL="http://opml.radiotime.com/Tune.ashx?id=s76368" bitrate="96" reliability="10" guide_id="s76368" subtext="Rockowo Bezkompromisowi" genre_id="g19" formats="mp3" item="station" image="http://cdn-radiotime-logos.tunein.com/s9608q.png" now_playing_id="s76368" preset_id="s76368"/>
+		<outline type="audio" text="KRK.FM 102.4 (Top 40-Pop)" URL="http://opml.radiotime.com/Tune.ashx?id=s16527" bitrate="128" reliability="10" guide_id="s16527" subtext="Polska" genre_id="g61" formats="mp3" item="station" image="http://cdn-radiotime-logos.tunein.com/s16527q.png" now_playing_id="s16527" preset_id="s16527"/>
+		<outline type="audio" text="PR R Krakow Nowy Sacz 90.0 (Rock)" URL="http://opml.radiotime.com/Tune.ashx?id=s103067" bitrate="32" reliability="85" guide_id="s103067" subtext="Polska" genre_id="g19" formats="mp3" item="station" image="http://cdn-radiotime-logos.tunein.com/s103064q.png" now_playing_id="s103067" preset_id="s103067"/>
+		<outline type="audio" text="PR R Krakow Tarnow 101.0 (Rock)" URL="http://opml.radiotime.com/Tune.ashx?id=s103069" bitrate="32" reliability="100" guide_id="s103069" subtext="Polska" genre_id="g19" formats="mp3" item="station" image="http://cdn-radiotime-logos.tunein.com/s103064q.png" now_playing_id="s103069" preset_id="s103069"/>
+		</outline>
 	</body>
 </opml>

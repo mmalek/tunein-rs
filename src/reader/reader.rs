@@ -34,7 +34,7 @@ impl Node
 pub struct Reader<R: Read>
 {
     reader: xml::reader::EventReader<R>,
-    path : Vec<Node>,
+    path: Vec<Node>,
 }
 
 fn map_err(e: xml::reader::Error) -> Error
