@@ -4,6 +4,7 @@ use common::*;
 use reader::event::*;
 use std::io::Read;
 use std::error::Error as StdError;
+use std::iter::{Iterator, IntoIterator};
 
 #[derive(Debug, PartialEq)]
 enum Node
@@ -157,6 +158,37 @@ impl<R: Read> Reader<R>
                 }
                 _ => {}
             }
+        }
+    }
+}
+
+impl<R: Read> IntoIterator for Reader<R> {
+    type Item = Result<Event>;
+    type IntoIter = Events<R>;
+
+    fn into_iter(self) -> Events<R> {
+        Events{reader: self, finished: false}
+    }
+}
+
+pub struct Events<R: Read> {
+    reader: Reader<R>,
+    finished: bool,
+}
+
+impl<R: Read> Iterator for Events<R> {
+    type Item = Result<Event>;
+
+    fn next(&mut self) -> Option<Result<Event>>{
+        if self.finished {
+            None
+        } else {
+            let result = self.reader.next();
+            self.finished = match result {
+                Ok(Event::EndDocument) | Err(_) => true,
+                _ => false,
+            };
+            Some(result)
         }
     }
 }
