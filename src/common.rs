@@ -2,23 +2,20 @@
 use std::result;
 
 #[derive(Debug, PartialEq)]
-pub struct Document
-{
+pub struct Document {
     pub version: Version,
     pub head: Head,
     pub outlines: Vec<Outline>,
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Version
-{
+pub struct Version {
     pub major: u8,
     pub minor: u8,
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Head
-{
+pub struct Head {
     pub title: String,
     pub status: Option<u32>,
 }
@@ -47,56 +44,62 @@ pub struct Audio {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Outline
-{
-    Group{text: String, key: String, outlines: Vec<Outline>},
+pub enum Outline {
+    Group {
+        text: String,
+        key: String,
+        outlines: Vec<Outline>,
+    },
     Link(Link),
     Audio(Audio),
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Format
-{
+pub enum Format {
     Unknown,
-    MP3
+    MP3,
 }
 
-impl Document
-{
-    pub fn new() -> Document
-    {
-        Document{version: Version::new(), head: Head::new(), outlines: Vec::new() }
+impl Document {
+    pub fn new() -> Document {
+        Document {
+            version: Version::new(),
+            head: Head::new(),
+            outlines: Vec::new(),
+        }
     }
 }
 
-impl Version
-{
-    pub fn new() -> Version
-    {
-        Version{major: 0, minor: 0}
+impl Version {
+    pub fn new() -> Version {
+        Version {
+            major: 0,
+            minor: 0,
+        }
     }
 }
 
-impl Head
-{
-    pub fn new() -> Head
-    {
-        Head{title: String::new(), status: None}
+impl Head {
+    pub fn new() -> Head {
+        Head {
+            title: String::new(),
+            status: None,
+        }
     }
 }
 
-impl Link
-{
-    pub fn new() -> Link
-    {
-        Link{text: String::new(), url: String::new(), key: String::new()}
+impl Link {
+    pub fn new() -> Link {
+        Link {
+            text: String::new(),
+            url: String::new(),
+            key: String::new(),
+        }
     }
 }
 
-impl Audio
-{
-    pub fn new() -> Audio
-    {
+impl Audio {
+    pub fn new() -> Audio {
         Audio {
             text: String::new(),
             subtext: String::new(),
@@ -109,14 +112,13 @@ impl Audio
             guide_id: String::new(),
             genre_id: String::new(),
             now_playing_id: String::new(),
-            preset_id: String::new()
+            preset_id: String::new(),
         }
     }
 }
 
 #[derive(Debug)]
-pub struct Error
-{
+pub struct Error {
     pub description: String,
 }
 
