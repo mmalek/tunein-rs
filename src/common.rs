@@ -122,4 +122,10 @@ pub struct Error {
     pub description: String,
 }
 
+impl Error {
+    pub fn new(description: &str) -> Error {
+        Error { description: description.into() }
+    }
+}
+
 pub type Result<T> = result::Result<T, Error>;

@@ -16,49 +16,40 @@ pub fn read<R: Read>(source: R) -> Result<Document> {
                 outline_groups.push(vec![]);
             }
             Event::EndDocument => {
-                if let Some(outlines) = outline_groups.pop() {
-                    document.outlines = outlines;
-                }
+                document.outlines = outline_groups.pop()
+                    .expect("No outline group available")
             }
-            Event::Title(title) => {
-                document.head.title = title;
-            }
-            Event::Status(status) => {
-                document.head.status = status;
-            }
+            Event::Title(title) => document.head.title = title,
+            Event::Status(status) => document.head.status = status,
             Event::Link(link) => {
-                if let Some(ref mut outlines) = outline_groups.last_mut() {
-                    outlines.push(Outline::Link(link));
-                }
+                outline_groups.last_mut()
+                    .expect("No outline group available")
+                    .push(Outline::Link(link))
             }
             Event::Audio(audio) => {
-                if let Some(ref mut outlines) = outline_groups.last_mut() {
-                    outlines.push(Outline::Audio(audio));
-                }
+                outline_groups.last_mut()
+                    .expect("No outline group available")
+                    .push(Outline::Audio(audio))
             }
             Event::StartOutlineGroup { text, key } => {
-                if let Some(ref mut outlines) = outline_groups.last_mut() {
-                    outlines.push(Outline::Group {
+                outline_groups.last_mut()
+                    .expect("No outline group available")
+                    .push(Outline::Group {
                         text: text,
                         key: key,
                         outlines: vec![],
                     });
-                }
                 outline_groups.push(vec![]);
             }
             Event::EndOutlineGroup => {
-                if let Some(ref mut children) = outline_groups.pop() {
-                    match outline_groups.last_mut().and_then(|o| o.last_mut()) {
-                        Some(&mut Outline::Group { ref mut outlines, .. }) => {
-                            outlines.append(children);
-                        }
-                        Some(_) => {}
-                        None => {
-                            return Err(Error {
-                                description: "End/start elements doesn't match".to_string(),
-                            });
-                        }
-                    }
+                let mut children = outline_groups.pop().expect("No outline group available");
+                let mut outline = outline_groups.last_mut()
+                    .and_then(|o| o.last_mut())
+                    .expect("End/start elements doesn't match");
+
+                match outline {
+                    &mut Outline::Group { ref mut outlines, .. } => outlines.append(&mut children),
+                    _ => {}
                 }
             }
             _ => {}
