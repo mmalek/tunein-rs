@@ -10,7 +10,7 @@ pub fn read<R: Read>(source: R) -> Result<Document> {
     let mut outline_groups: Vec<Vec<Outline>> = vec![];
 
     for event in Reader::new(source) {
-        match try!(event) {
+        match event? {
             Event::StartDocument { version } => {
                 document.version.major = version;
                 outline_groups.push(vec![]);

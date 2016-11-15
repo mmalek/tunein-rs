@@ -50,7 +50,7 @@ impl<R: Read> Reader<R> {
     pub fn next(&mut self) -> Result<Event> {
         let mut content = String::new();
         loop {
-            match try!(self.reader.next().map_err(map_err)) {
+            match self.reader.next().map_err(map_err)? {
                 xml::reader::XmlEvent::StartElement { ref name, ref attributes, .. } => {
                     match &name.local_name as &str {
                         "head" => {
@@ -164,14 +164,14 @@ impl<R: Read> Reader<R> {
                             "subtext" => audio.subtext = attr.value.clone(),
                             "URL" => audio.url = attr.value.clone(),
                             "bitrate" => {
-                                audio.bitrate = try!(attr.value
+                                audio.bitrate = attr.value
                                     .parse()
-                                    .map_err(|_| Error::new("Invalid bitrate format")))
+                                    .map_err(|_| Error::new("Invalid bitrate format"))?
                             }
                             "reliability" => {
-                                audio.reliability = try!(attr.value
+                                audio.reliability = attr.value
                                     .parse()
-                                    .map_err(|_| Error::new("Invalid reliability format")))
+                                    .map_err(|_| Error::new("Invalid reliability format"))?
                             }
                             "formats" => {
                                 audio.format = match &attr.value as &str {
