@@ -7,50 +7,34 @@ pub fn read<R: Read>(source: R) -> Result<Document> {
 
     let mut document = Document::new();
 
-    let mut outline_groups: Vec<Vec<Outline>> = vec![];
+    let mut outline_stack: Vec<Outline> = vec![];
 
     for event in Reader::new(source) {
         match event? {
             Event::StartDocument { version } => {
                 document.version.major = version;
-                outline_groups.push(vec![]);
             }
             Event::EndDocument => {
-                document.outlines = outline_groups.pop()
-                    .expect("No outline group available")
+                if !outline_stack.is_empty() {
+                    unreachable!("Outline stack is not empty");
+                }
             }
             Event::Title(title) => document.head.title = title,
             Event::Status(status) => document.head.status = status,
-            Event::Link(link) => {
-                outline_groups.last_mut()
-                    .expect("No outline group available")
-                    .push(Outline::Link(link))
-            }
-            Event::Audio(audio) => {
-                outline_groups.last_mut()
-                    .expect("No outline group available")
-                    .push(Outline::Audio(audio))
-            }
-            Event::StartOutlineGroup { text, key } => {
-                outline_groups.last_mut()
-                    .expect("No outline group available")
-                    .push(Outline::Group {
-                        text: text,
-                        key: key,
-                        outlines: vec![],
-                    });
-                outline_groups.push(vec![]);
-            }
-            Event::EndOutlineGroup => {
-                let mut children = outline_groups.pop().expect("No outline group available");
-                let mut outline = outline_groups.last_mut()
-                    .and_then(|o| o.last_mut())
-                    .expect("End/start elements doesn't match");
+            Event::StartOutline(outline) => outline_stack.push(outline),
+            Event::EndOutline => {
+                let outline = outline_stack.pop().expect("End/start elements doesn't match");
 
-                match outline {
-                    &mut Outline::Group { ref mut outlines, .. } => outlines.append(&mut children),
-                    _ => {}
-                }
+                let outlines = outline_stack.last_mut()
+                    .map(|o| {
+                        match *o {
+                            Outline::Group { ref mut outlines, .. } => outlines,
+                            _ => unreachable!("Last outline is not group"),
+                        }
+                    })
+                    .unwrap_or(&mut document.outlines);
+
+                outlines.push(outline);
             }
             _ => {}
         }

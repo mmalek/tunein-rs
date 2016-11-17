@@ -10,8 +10,6 @@ pub enum Event {
     EndBody,
     Title(String),
     Status(Option<u32>),
-    StartOutlineGroup { text: String, key: String },
-    EndOutlineGroup,
-    Link(Link),
-    Audio(Audio),
+    StartOutline(Outline),
+    EndOutline,
 }
