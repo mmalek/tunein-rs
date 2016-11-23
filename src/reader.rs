@@ -1,7 +1,7 @@
 extern crate xml;
 
 use common::*;
-use reader::event::*;
+use event::*;
 use std::io::Read;
 use std::error::Error as StdError;
 use std::iter::{Iterator, IntoIterator};

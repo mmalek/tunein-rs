@@ -1,4 +1,5 @@
 use common::*;
+use event::*;
 use reader::*;
 
 use std::io::Read;

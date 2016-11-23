@@ -52,12 +52,12 @@ fn make_audio(text: &str,
 
 #[test]
 fn empty() {
-    assert!(tunein::reader::read(io::empty()).is_err());
+    assert!(tunein::read(io::empty()).is_err());
 }
 
 #[test]
 fn sample_1() {
-    let document = tunein::reader::read(File::open("tests/documents/sample_1.opml").unwrap())
+    let document = tunein::read(File::open("tests/documents/sample_1.opml").unwrap())
         .unwrap();
     let expected_document = tunein::Document {
         version: tunein::Version {
@@ -95,7 +95,7 @@ fn sample_1() {
 
 #[test]
 fn sample_2() {
-    let document = tunein::reader::read(File::open("tests/documents/sample_2.opml").unwrap())
+    let document = tunein::read(File::open("tests/documents/sample_2.opml").unwrap())
         .unwrap();
     let expected_document = tunein::Document {
         version: tunein::Version {
@@ -171,11 +171,11 @@ fn sample_2() {
 #[test]
 fn broken_1() {
     let input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><opml version=\"1\"><head>".as_bytes();
-    assert!(tunein::reader::read(input).is_err());
+    assert!(tunein::read(input).is_err());
 }
 
 #[test]
 fn minimal_ok() {
     let input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><opml version=\"1\"></opml>".as_bytes();
-    assert!(tunein::reader::read(input).is_ok());
+    assert!(tunein::read(input).is_ok());
 }

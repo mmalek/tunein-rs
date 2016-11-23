@@ -1,6 +1,6 @@
 
 use std::result;
-use reader::event::*;
+use event::*;
 
 #[derive(Debug, PartialEq)]
 pub struct Document {
