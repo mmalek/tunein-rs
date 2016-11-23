@@ -1,20 +1,20 @@
 
-extern crate opml;
+extern crate tunein;
 use std::fs::File;
 use std::io;
 
 #[cfg(test)]
 
-fn make_group(text: &str, key: &str, outlines: Vec<opml::common::Outline>) -> opml::Outline {
-    opml::Outline::Group(opml::Group {
+fn make_group(text: &str, key: &str, outlines: Vec<tunein::common::Outline>) -> tunein::Outline {
+    tunein::Outline::Group(tunein::Group {
         text: text.into(),
         key: key.into(),
         outlines: outlines,
     })
 }
 
-fn make_link(text: &str, url: &str, key: &str) -> opml::Outline {
-    opml::Outline::Link(opml::Link {
+fn make_link(text: &str, url: &str, key: &str) -> tunein::Outline {
+    tunein::Outline::Link(tunein::Link {
         text: text.into(),
         url: url.into(),
         key: key.into(),
@@ -26,15 +26,15 @@ fn make_audio(text: &str,
               url: &str,
               bitrate: u16,
               reliability: u16,
-              format: opml::Format,
+              format: tunein::Format,
               item: &str,
               image: &str,
               guide_id: &str,
               genre_id: &str,
               now_playing_id: &str,
               preset_id: &str)
-              -> opml::Outline {
-    opml::Outline::Audio(opml::Audio {
+              -> tunein::Outline {
+    tunein::Outline::Audio(tunein::Audio {
         text: text.into(),
         subtext: subtext.into(),
         url: url.into(),
@@ -52,19 +52,19 @@ fn make_audio(text: &str,
 
 #[test]
 fn empty() {
-    assert!(opml::reader::read(io::empty()).is_err());
+    assert!(tunein::reader::read(io::empty()).is_err());
 }
 
 #[test]
 fn sample_1() {
-    let document = opml::reader::read(File::open("tests/documents/sample_1.opml").unwrap())
+    let document = tunein::reader::read(File::open("tests/documents/sample_1.opml").unwrap())
         .unwrap();
-    let expected_document = opml::Document {
-        version: opml::Version {
+    let expected_document = tunein::Document {
+        version: tunein::Version {
             major: 1,
             minor: 0,
         },
-        head: opml::Head {
+        head: tunein::Head {
             title: "Browse".into(),
             status: Some(200),
         },
@@ -95,14 +95,14 @@ fn sample_1() {
 
 #[test]
 fn sample_2() {
-    let document = opml::reader::read(File::open("tests/documents/sample_2.opml").unwrap())
+    let document = tunein::reader::read(File::open("tests/documents/sample_2.opml").unwrap())
         .unwrap();
-    let expected_document = opml::Document {
-        version: opml::Version {
+    let expected_document = tunein::Document {
+        version: tunein::Version {
             major: 1,
             minor: 0,
         },
-        head: opml::Head {
+        head: tunein::Head {
             title: "Kraków".into(),
             status: Some(300),
         },
@@ -114,7 +114,7 @@ fn sample_2() {
                                                    ashx?id=s76368",
                                                   96,
                                                   10,
-                                                  opml::Format::MP3,
+                                                  tunein::Format::MP3,
                                                   "station",
                                                   "http://cdn-radiotime-logos.tunein.\
                                                    com/s9608q.png",
@@ -128,7 +128,7 @@ fn sample_2() {
                                                    ashx?id=s16527",
                                                   128,
                                                   10,
-                                                  opml::Format::MP3,
+                                                  tunein::Format::MP3,
                                                   "station",
                                                   "http://cdn-radiotime-logos.tunein.\
                                                    com/s16527q.png",
@@ -142,7 +142,7 @@ fn sample_2() {
                                                    ashx?id=s103067",
                                                   32,
                                                   85,
-                                                  opml::Format::MP3,
+                                                  tunein::Format::MP3,
                                                   "station",
                                                   "http://cdn-radiotime-logos.tunein.\
                                                    com/s103064q.png",
@@ -156,7 +156,7 @@ fn sample_2() {
                                                    ashx?id=s103069",
                                                   32,
                                                   100,
-                                                  opml::Format::MP3,
+                                                  tunein::Format::MP3,
                                                   "station",
                                                   "http://cdn-radiotime-logos.tunein.\
                                                    com/s103064q.png",
@@ -171,11 +171,11 @@ fn sample_2() {
 #[test]
 fn broken_1() {
     let input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><opml version=\"1\"><head>".as_bytes();
-    assert!(opml::reader::read(input).is_err());
+    assert!(tunein::reader::read(input).is_err());
 }
 
 #[test]
 fn minimal_ok() {
     let input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><opml version=\"1\"></opml>".as_bytes();
-    assert!(opml::reader::read(input).is_ok());
+    assert!(tunein::reader::read(input).is_ok());
 }

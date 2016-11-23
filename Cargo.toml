@@ -1,10 +1,10 @@
 [package]
-name = "opml-rs"
+name = "tunein-rs"
 version = "0.1.0"
 authors = ["Michał Małek <michalm@fastmail.fm>"]
 
 [lib]
-name = "opml"
+name = "tunein"
 path = "src/lib.rs"
 
 [dependencies]
