@@ -6,18 +6,18 @@ use std::io;
 #[cfg(test)]
 
 fn make_group(text: &str, key: &str, outlines: Vec<opml::common::Outline>) -> opml::Outline {
-    opml::Outline::Group {
-        text: text.to_string(),
-        key: key.to_string(),
+    opml::Outline::Group(opml::Group {
+        text: text.into(),
+        key: key.into(),
         outlines: outlines,
-    }
+    })
 }
 
 fn make_link(text: &str, url: &str, key: &str) -> opml::Outline {
     opml::Outline::Link(opml::Link {
-        text: text.to_string(),
-        url: url.to_string(),
-        key: key.to_string(),
+        text: text.into(),
+        url: url.into(),
+        key: key.into(),
     })
 }
 
@@ -35,18 +35,18 @@ fn make_audio(text: &str,
               preset_id: &str)
               -> opml::Outline {
     opml::Outline::Audio(opml::Audio {
-        text: text.to_string(),
-        subtext: subtext.to_string(),
-        url: url.to_string(),
+        text: text.into(),
+        subtext: subtext.into(),
+        url: url.into(),
         bitrate: bitrate,
         reliability: reliability,
         format: format,
-        item: item.to_string(),
-        image: image.to_string(),
-        guide_id: guide_id.to_string(),
-        genre_id: genre_id.to_string(),
-        now_playing_id: now_playing_id.to_string(),
-        preset_id: preset_id.to_string(),
+        item: item.into(),
+        image: image.into(),
+        guide_id: guide_id.into(),
+        genre_id: genre_id.into(),
+        now_playing_id: now_playing_id.into(),
+        preset_id: preset_id.into(),
     })
 }
 
@@ -65,7 +65,7 @@ fn sample_1() {
             minor: 0,
         },
         head: opml::Head {
-            title: "Browse".to_string(),
+            title: "Browse".into(),
             status: Some(200),
         },
         outlines: vec![make_link("Local Radio",
@@ -103,7 +103,7 @@ fn sample_2() {
             minor: 0,
         },
         head: opml::Head {
-            title: "Kraków".to_string(),
+            title: "Kraków".into(),
             status: Some(300),
         },
         outlines: vec![make_group("Stacje",

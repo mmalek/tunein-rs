@@ -21,14 +21,14 @@ pub fn read<R: Read>(source: R) -> Result<Document> {
             }
             Event::Title(title) => document.head.title = title,
             Event::Status(status) => document.head.status = status,
-            Event::StartOutline(outline) => outline_stack.push(outline),
+            Event::StartOutline(outline) => outline_stack.push(outline.into()),
             Event::EndOutline => {
                 let outline = outline_stack.pop().expect("End/start elements doesn't match");
 
                 let outlines = outline_stack.last_mut()
                     .map(|o| {
                         match *o {
-                            Outline::Group { ref mut outlines, .. } => outlines,
+                            Outline::Group(Group { ref mut outlines, .. }) => outlines,
                             _ => unreachable!("Last outline is not group"),
                         }
                     })

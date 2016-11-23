@@ -1,5 +1,6 @@
 
 use std::result;
+use reader::event::*;
 
 #[derive(Debug, PartialEq)]
 pub struct Document {
@@ -18,6 +19,13 @@ pub struct Version {
 pub struct Head {
     pub title: String,
     pub status: Option<u32>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Group {
+    pub text: String,
+    pub key: String,
+    pub outlines: Vec<Outline>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -45,11 +53,7 @@ pub struct Audio {
 
 #[derive(Debug, PartialEq)]
 pub enum Outline {
-    Group {
-        text: String,
-        key: String,
-        outlines: Vec<Outline>,
-    },
+    Group(Group),
     Link(Link),
     Audio(Audio),
 }
@@ -88,6 +92,16 @@ impl Head {
     }
 }
 
+impl Group {
+    pub fn new() -> Group {
+        Group {
+            text: String::new(),
+            key: String::new(),
+            outlines: vec![],
+        }
+    }
+}
+
 impl Link {
     pub fn new() -> Link {
         Link {
@@ -113,6 +127,22 @@ impl Audio {
             genre_id: String::new(),
             now_playing_id: String::new(),
             preset_id: String::new(),
+        }
+    }
+}
+
+impl From<OutlineEvent> for Outline {
+    fn from(outline: OutlineEvent) -> Outline {
+        match outline {
+            OutlineEvent::Group { text, key } => {
+                Outline::Group(Group {
+                    text: text,
+                    key: key,
+                    outlines: vec![],
+                })
+            }
+            OutlineEvent::Link(link) => Outline::Link(link),
+            OutlineEvent::Audio(audio) => Outline::Audio(audio),
         }
     }
 }
