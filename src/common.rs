@@ -1,4 +1,6 @@
 
+use std::error::Error as StdError;
+use std::fmt;
 use std::result;
 use event::*;
 
@@ -155,6 +157,21 @@ pub struct Error {
 impl Error {
     pub fn new(description: &str) -> Error {
         Error { description: description.into() }
+    }
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str(self.description())
+    }
+}
+
+impl StdError for Error {
+    fn description(&self) -> &str {
+        self.description.as_str()
+    }
+    fn cause(&self) -> Option<&StdError> {
+        None
     }
 }
 
