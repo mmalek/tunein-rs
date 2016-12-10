@@ -35,6 +35,7 @@ pub struct Link {
     pub text: String,
     pub url: String,
     pub key: String,
+    pub guide_id: String,
 }
 
 #[derive(Debug, PartialEq)]
@@ -110,6 +111,7 @@ impl Link {
             text: String::new(),
             url: String::new(),
             key: String::new(),
+            guide_id: String::new(),
         }
     }
 }

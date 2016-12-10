@@ -108,6 +108,7 @@ fn parse_link(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Outlin
             "text" => link.text = attr.value.clone(),
             "URL" => link.url = attr.value.clone(),
             "key" => link.key = attr.value.clone(),
+            "guide_id" => link.guide_id = attr.value.clone(),
             _ => {}
         }
     }

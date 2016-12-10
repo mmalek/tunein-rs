@@ -13,11 +13,12 @@ fn make_group(text: &str, key: &str, outlines: Vec<tunein::common::Outline>) -> 
     })
 }
 
-fn make_link(text: &str, url: &str, key: &str) -> tunein::Outline {
+fn make_link(text: &str, url: &str, key: &str, guide_id: &str) -> tunein::Outline {
     tunein::Outline::Link(tunein::Link {
         text: text.into(),
         url: url.into(),
         key: key.into(),
+        guide_id: guide_id.into(),
     })
 }
 
@@ -70,25 +71,32 @@ fn sample_1() {
         },
         outlines: vec![make_link("Local Radio",
                                  "http://opml.radiotime.com/Browse.ashx?c=local",
-                                 "local"),
+                                 "local",
+                                 ""),
                        make_link("Music",
                                  "http://opml.radiotime.com/Browse.ashx?c=music",
-                                 "music"),
+                                 "music",
+                                 ""),
                        make_link("Talk",
                                  "http://opml.radiotime.com/Browse.ashx?c=talk",
-                                 "talk"),
+                                 "talk",
+                                 ""),
                        make_link("Sports",
                                  "http://opml.radiotime.com/Browse.ashx?c=sports",
-                                 "sports"),
+                                 "sports",
+                                 ""),
                        make_link("By Location",
                                  "http://opml.radiotime.com/Browse.ashx?id=r0",
-                                 "location"),
+                                 "location",
+                                 ""),
                        make_link("By Language",
                                  "http://opml.radiotime.com/Browse.ashx?c=lang",
-                                 "language"),
+                                 "language",
+                                 ""),
                        make_link("Podcasts",
                                  "http://opml.radiotime.com/Browse.ashx?c=podcast",
-                                 "podcast")],
+                                 "podcast",
+                                 "")],
     };
     assert_eq!(document, expected_document);
 }
@@ -164,6 +172,42 @@ fn sample_2() {
                                                   "g19",
                                                   "s103069",
                                                   "s103069")])],
+    };
+    assert_eq!(document, expected_document);
+}
+
+#[test]
+fn sample_3() {
+    let document = tunein::read(File::open("tests/documents/sample_3.opml").unwrap())
+        .unwrap();
+    let expected_document = tunein::Document {
+        version: tunein::Version {
+            major: 1,
+            minor: 0,
+        },
+        head: tunein::Head {
+            title: "Angola".into(),
+            status: Some(200),
+        },
+        outlines: vec![make_group("All Stations",
+                                  "stations",
+                                  vec![make_audio("L.A.C FM 95.5 (Portuguese Music)",
+                                                  "Luanda Antena Comercial",
+                                                  "http://opml.radiotime.com/Tune.ashx?id=s6228",
+                                                  128,
+                                                  91,
+                                                  tunein::Format::MP3,
+                                                  "station",
+                                                  "http://cdn-radiotime-logos.tunein.com/s6228q.png",
+                                                  "s6228",
+                                                  "g158",
+                                                  "s6228",
+                                                  "s6228")
+                                       ]),
+                       make_link("Luanda",
+                                 "http://opml.radiotime.com/Browse.ashx?id=r100526",
+                                 "",
+                                 "r100526")],
     };
     assert_eq!(document, expected_document);
 }
