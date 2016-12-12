@@ -8,4 +8,7 @@ name = "tunein"
 path = "src/lib.rs"
 
 [dependencies]
-xml-rs = ">= 0.3.2, < 0.4.0"
+xml-rs = "~0.3"
+
+[dev-dependencies]
+hyper = "~0.9"
