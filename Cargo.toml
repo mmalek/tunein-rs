@@ -1,7 +1,10 @@
 [package]
 name = "tunein-rs"
+description = "Tunein internet radio database API parser"
 version = "0.1.0"
 authors = ["Michał Małek <michalm@fastmail.fm>"]
+license = "MIT"
+repository = "https://github.com/mmalek/tunein-rs"
 
 [lib]
 name = "tunein"
