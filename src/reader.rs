@@ -1,15 +1,11 @@
 use crate::common::*;
+use crate::error::Error;
 use crate::event::*;
-use std::error::Error as StdError;
 use std::io::Read;
 use std::iter::{IntoIterator, Iterator};
 
 pub struct Reader<R: Read> {
     reader: xml::reader::EventReader<R>,
-}
-
-fn map_err(e: xml::reader::Error) -> Error {
-    Error::new(e.description())
 }
 
 impl<R: Read> Reader<R> {
@@ -19,10 +15,10 @@ impl<R: Read> Reader<R> {
         }
     }
 
-    pub fn next(&mut self) -> Result<Event> {
+    pub fn next(&mut self) -> Result<Event, Error> {
         let mut content = String::new();
         loop {
-            match self.reader.next().map_err(map_err)? {
+            match self.reader.next()? {
                 xml::reader::XmlEvent::StartElement {
                     ref name,
                     ref attributes,
@@ -42,7 +38,7 @@ impl<R: Read> Reader<R> {
                         return parse_outline(&attributes);
                     }
                     _ => {
-                        return Err(Error::new("Unexpected element"));
+                        return Err(Error::UnexpectedElement);
                     }
                 },
                 xml::reader::XmlEvent::Characters(s) => {
@@ -56,7 +52,7 @@ impl<R: Read> Reader<R> {
                         "status" => Ok(Event::Status(content.parse().ok())),
                         "opml" => Ok(Event::EndDocument),
                         "outline" => Ok(Event::EndOutline),
-                        _ => Err(Error::new("Unexpected element")),
+                        _ => Err(Error::UnexpectedElement),
                     }
                 }
                 xml::reader::XmlEvent::EndDocument => {}
@@ -66,20 +62,20 @@ impl<R: Read> Reader<R> {
     }
 }
 
-fn parse_opml(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Event> {
+fn parse_opml(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Event, Error> {
     attributes
         .iter()
         .find(|ref attr| attr.name.local_name == "version")
-        .ok_or(Error::new("Missing version attribute"))
+        .ok_or(Error::MissingVersionAttr)
         .and_then(|v| {
             v.value
                 .parse::<u8>()
-                .map_err(|_| Error::new("Invalid version format"))
+                .map_err(|_| Error::InvalidVersionFormat)
         })
         .and_then(|version| Ok(Event::StartDocument { version: version }))
 }
 
-fn parse_outline(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Event> {
+fn parse_outline(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Event, Error> {
     attributes
         .iter()
         .find(|ref attr| attr.name.local_name == "type")
@@ -88,13 +84,13 @@ fn parse_outline(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Eve
             |outline_type| match &outline_type.value as &str {
                 "link" => parse_link(attributes),
                 "audio" => parse_audio(attributes),
-                _ => Err(Error::new("Invalid outline type")),
+                _ => Err(Error::InvalidOutlineType),
             },
         )
         .map(|outline| Event::StartOutline(outline))
 }
 
-fn parse_group(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<OutlineEvent> {
+fn parse_group(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<OutlineEvent, Error> {
     let mut text = String::new();
     let mut key = String::new();
     for attr in attributes {
@@ -110,7 +106,7 @@ fn parse_group(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Outli
     })
 }
 
-fn parse_link(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<OutlineEvent> {
+fn parse_link(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<OutlineEvent, Error> {
     let mut link = Link::new();
     for attr in attributes {
         match &attr.name.local_name as &str {
@@ -124,7 +120,7 @@ fn parse_link(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Outlin
     Ok(OutlineEvent::Link(link))
 }
 
-fn parse_audio(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<OutlineEvent> {
+fn parse_audio(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<OutlineEvent, Error> {
     let mut audio = Audio::new();
     for attr in attributes {
         match &attr.name.local_name as &str {
@@ -135,13 +131,13 @@ fn parse_audio(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Outli
                 audio.bitrate = attr
                     .value
                     .parse()
-                    .map_err(|_| Error::new("Invalid bitrate format"))?
+                    .map_err(|_| Error::InvalidBitrateFormat)?
             }
             "reliability" => {
                 audio.reliability = attr
                     .value
                     .parse()
-                    .map_err(|_| Error::new("Invalid reliability format"))?
+                    .map_err(|_| Error::InvalidReliabilityFormat)?
             }
             "formats" => {
                 audio.format = match &attr.value as &str {
@@ -162,7 +158,7 @@ fn parse_audio(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Outli
 }
 
 impl<R: Read> IntoIterator for Reader<R> {
-    type Item = Result<Event>;
+    type Item = Result<Event, Error>;
     type IntoIter = Events<R>;
 
     fn into_iter(self) -> Events<R> {
@@ -179,9 +175,9 @@ pub struct Events<R: Read> {
 }
 
 impl<R: Read> Iterator for Events<R> {
-    type Item = Result<Event>;
+    type Item = Result<Event, Error>;
 
-    fn next(&mut self) -> Option<Result<Event>> {
+    fn next(&mut self) -> Option<Result<Event, Error>> {
         if self.finished {
             None
         } else {

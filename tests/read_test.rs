@@ -4,7 +4,7 @@ use std::io;
 
 #[cfg(test)]
 
-fn make_group(text: &str, key: &str, outlines: Vec<tunein::common::Outline>) -> tunein::Outline {
+fn make_group(text: &str, key: &str, outlines: Vec<tunein::Outline>) -> tunein::Outline {
     tunein::Outline::Group(tunein::Group {
         text: text.into(),
         key: key.into(),

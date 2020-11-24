@@ -1,10 +1,11 @@
 use crate::common::*;
+use crate::error::Error;
 use crate::event::*;
 use crate::reader::*;
 
 use std::io::Read;
 
-pub fn read<R: Read>(source: R) -> Result<Document> {
+pub fn read<R: Read>(source: R) -> Result<Document, Error> {
     let mut document = Document::new();
 
     let mut outline_stack: Vec<Outline> = vec![];

@@ -1,7 +1,4 @@
 use crate::event::*;
-use std::error::Error as StdError;
-use std::fmt;
-use std::result;
 
 #[derive(Debug, PartialEq)]
 pub struct Document {
@@ -144,33 +141,3 @@ impl From<OutlineEvent> for Outline {
         }
     }
 }
-
-#[derive(Debug)]
-pub struct Error {
-    pub description: String,
-}
-
-impl Error {
-    pub fn new(description: &str) -> Error {
-        Error {
-            description: description.into(),
-        }
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str(self.description())
-    }
-}
-
-impl StdError for Error {
-    fn description(&self) -> &str {
-        self.description.as_str()
-    }
-    fn cause(&self) -> Option<&StdError> {
-        None
-    }
-}
-
-pub type Result<T> = result::Result<T, Error>;
