@@ -1,10 +1,8 @@
-extern crate xml;
-
-use common::*;
-use event::*;
-use std::io::Read;
+use crate::common::*;
+use crate::event::*;
 use std::error::Error as StdError;
-use std::iter::{Iterator, IntoIterator};
+use std::io::Read;
+use std::iter::{IntoIterator, Iterator};
 
 pub struct Reader<R: Read> {
     reader: xml::reader::EventReader<R>,
@@ -16,33 +14,37 @@ fn map_err(e: xml::reader::Error) -> Error {
 
 impl<R: Read> Reader<R> {
     pub fn new(source: R) -> Reader<R> {
-        Reader { reader: xml::reader::EventReader::new(source) }
+        Reader {
+            reader: xml::reader::EventReader::new(source),
+        }
     }
 
     pub fn next(&mut self) -> Result<Event> {
         let mut content = String::new();
         loop {
             match self.reader.next().map_err(map_err)? {
-                xml::reader::XmlEvent::StartElement { ref name, ref attributes, .. } => {
-                    match &name.local_name as &str {
-                        "head" => {
-                            return Ok(Event::StartHead);
-                        }
-                        "body" => {
-                            return Ok(Event::StartBody);
-                        }
-                        "title" | "status" => {}
-                        "opml" => {
-                            return parse_opml(&attributes);
-                        }
-                        "outline" => {
-                            return parse_outline(&attributes);
-                        }
-                        _ => {
-                            return Err(Error::new("Unexpected element"));
-                        }
+                xml::reader::XmlEvent::StartElement {
+                    ref name,
+                    ref attributes,
+                    ..
+                } => match &name.local_name as &str {
+                    "head" => {
+                        return Ok(Event::StartHead);
                     }
-                }
+                    "body" => {
+                        return Ok(Event::StartBody);
+                    }
+                    "title" | "status" => {}
+                    "opml" => {
+                        return parse_opml(&attributes);
+                    }
+                    "outline" => {
+                        return parse_outline(&attributes);
+                    }
+                    _ => {
+                        return Err(Error::new("Unexpected element"));
+                    }
+                },
                 xml::reader::XmlEvent::Characters(s) => {
                     content = s;
                 }
@@ -65,23 +67,30 @@ impl<R: Read> Reader<R> {
 }
 
 fn parse_opml(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Event> {
-    attributes.iter()
+    attributes
+        .iter()
         .find(|ref attr| attr.name.local_name == "version")
         .ok_or(Error::new("Missing version attribute"))
-        .and_then(|v| v.value.parse::<u8>().map_err(|_| Error::new("Invalid version format")))
+        .and_then(|v| {
+            v.value
+                .parse::<u8>()
+                .map_err(|_| Error::new("Invalid version format"))
+        })
         .and_then(|version| Ok(Event::StartDocument { version: version }))
 }
 
 fn parse_outline(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Event> {
-    attributes.iter()
+    attributes
+        .iter()
         .find(|ref attr| attr.name.local_name == "type")
-        .map_or_else(|| parse_group(attributes), |outline_type| {
-            match &outline_type.value as &str {
+        .map_or_else(
+            || parse_group(attributes),
+            |outline_type| match &outline_type.value as &str {
                 "link" => parse_link(attributes),
                 "audio" => parse_audio(attributes),
                 _ => Err(Error::new("Invalid outline type")),
-            }
-        })
+            },
+        )
         .map(|outline| Event::StartOutline(outline))
 }
 
@@ -123,12 +132,14 @@ fn parse_audio(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Outli
             "subtext" => audio.subtext = attr.value.clone(),
             "URL" => audio.url = attr.value.clone(),
             "bitrate" => {
-                audio.bitrate = attr.value
+                audio.bitrate = attr
+                    .value
                     .parse()
                     .map_err(|_| Error::new("Invalid bitrate format"))?
             }
             "reliability" => {
-                audio.reliability = attr.value
+                audio.reliability = attr
+                    .value
                     .parse()
                     .map_err(|_| Error::new("Invalid reliability format"))?
             }
@@ -176,8 +187,7 @@ impl<R: Read> Iterator for Events<R> {
         } else {
             let result = self.reader.next();
             self.finished = match result {
-                Ok(Event::EndDocument) |
-                Err(_) => true,
+                Ok(Event::EndDocument) | Err(_) => true,
                 _ => false,
             };
             Some(result)

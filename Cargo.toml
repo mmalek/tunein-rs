@@ -5,6 +5,7 @@ version = "0.1.0"
 authors = ["Michał Małek <michalm@fastmail.fm>"]
 license = "MIT"
 repository = "https://github.com/mmalek/tunein-rs"
+edition = "2018"
 
 [lib]
 name = "tunein"
@@ -14,4 +15,5 @@ path = "src/lib.rs"
 xml-rs = "~0.3"
 
 [dev-dependencies]
-hyper = "~0.9"
+hyper = "~0.13"
+tokio = { version = "~0.2", features = ["macros", "rt-threaded", "stream"] }

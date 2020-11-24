@@ -1,19 +1,20 @@
-
-extern crate hyper;
-extern crate tunein;
-
-use std::time::Duration;
 use std::error::Error;
+use std::io::Cursor;
+use tokio::stream::StreamExt;
 
-fn main()
-{
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
     println!("Fetching main...");
 
-    let mut client = hyper::Client::new();
-    client.set_read_timeout(Some(Duration::new(5,0)));
-    println!("{:#?}", client.get(tunein::request::BROWSE)
-                       .send()
-                       .map_err(|e| format!("Connection error: {}", e.description()))
-                       .and_then(|response| tunein::read(response)
-                                            .map_err(|e| format!("Parse error: {}", e.description()))));
+    let client = hyper::Client::new();
+    let response = client.get(tunein::request::BROWSE.parse()?).await?;
+    let body: Vec<_> = response.into_body().collect::<Result<_, _>>().await?;
+    let mut buffer = Vec::new();
+    for bytes in body {
+        buffer.extend_from_slice(&bytes[..]);
+    }
+
+    println!("{:#?}", tunein::read(Cursor::new(buffer))?);
+
+    Ok(())
 }

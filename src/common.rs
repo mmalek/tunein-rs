@@ -1,8 +1,7 @@
-
+use crate::event::*;
 use std::error::Error as StdError;
 use std::fmt;
 use std::result;
-use event::*;
 
 #[derive(Debug, PartialEq)]
 pub struct Document {
@@ -79,10 +78,7 @@ impl Document {
 
 impl Version {
     pub fn new() -> Version {
-        Version {
-            major: 0,
-            minor: 0,
-        }
+        Version { major: 0, minor: 0 }
     }
 }
 
@@ -138,13 +134,11 @@ impl Audio {
 impl From<OutlineEvent> for Outline {
     fn from(outline: OutlineEvent) -> Outline {
         match outline {
-            OutlineEvent::Group { text, key } => {
-                Outline::Group(Group {
-                    text: text,
-                    key: key,
-                    outlines: vec![],
-                })
-            }
+            OutlineEvent::Group { text, key } => Outline::Group(Group {
+                text: text,
+                key: key,
+                outlines: vec![],
+            }),
             OutlineEvent::Link(link) => Outline::Link(link),
             OutlineEvent::Audio(audio) => Outline::Audio(audio),
         }
@@ -158,7 +152,9 @@ pub struct Error {
 
 impl Error {
     pub fn new(description: &str) -> Error {
-        Error { description: description.into() }
+        Error {
+            description: description.into(),
+        }
     }
 }
 

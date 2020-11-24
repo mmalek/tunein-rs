@@ -1,5 +1,4 @@
-
-use common::*;
+use crate::common::*;
 
 #[derive(Debug, PartialEq)]
 pub enum Event {

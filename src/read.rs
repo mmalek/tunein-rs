@@ -1,11 +1,10 @@
-use common::*;
-use event::*;
-use reader::*;
+use crate::common::*;
+use crate::event::*;
+use crate::reader::*;
 
 use std::io::Read;
 
 pub fn read<R: Read>(source: R) -> Result<Document> {
-
     let mut document = Document::new();
 
     let mut outline_stack: Vec<Outline> = vec![];
@@ -24,14 +23,17 @@ pub fn read<R: Read>(source: R) -> Result<Document> {
             Event::Status(status) => document.head.status = status,
             Event::StartOutline(outline) => outline_stack.push(outline.into()),
             Event::EndOutline => {
-                let outline = outline_stack.pop().expect("End/start elements doesn't match");
+                let outline = outline_stack
+                    .pop()
+                    .expect("End/start elements doesn't match");
 
-                let outlines = outline_stack.last_mut()
-                    .map(|o| {
-                        match *o {
-                            Outline::Group(Group { ref mut outlines, .. }) => outlines,
-                            _ => unreachable!("Last outline is not group"),
-                        }
+                let outlines = outline_stack
+                    .last_mut()
+                    .map(|o| match *o {
+                        Outline::Group(Group {
+                            ref mut outlines, ..
+                        }) => outlines,
+                        _ => unreachable!("Last outline is not group"),
                     })
                     .unwrap_or(&mut document.outlines);
 
