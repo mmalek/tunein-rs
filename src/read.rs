@@ -44,5 +44,5 @@ pub fn read<R: Read>(source: R) -> Result<Document, Error> {
         }
     }
 
-    return Ok(document);
+    Ok(document)
 }
