@@ -101,10 +101,7 @@ fn parse_group(attributes: &[xml::attribute::OwnedAttribute]) -> Result<OutlineE
             _ => {}
         }
     }
-    Ok(OutlineEvent::Group {
-        text: text,
-        key: key,
-    })
+    Ok(OutlineEvent::Group { text, key })
 }
 
 fn parse_link(attributes: &[xml::attribute::OwnedAttribute]) -> Result<OutlineEvent, Error> {

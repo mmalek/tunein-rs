@@ -25,8 +25,8 @@ impl From<OutlineEvent> for Outline {
     fn from(outline: OutlineEvent) -> Outline {
         match outline {
             OutlineEvent::Group { text, key } => Outline::Group(Group {
-                text: text,
-                key: key,
+                text,
+                key,
                 outlines: vec![],
             }),
             OutlineEvent::Link(link) => Outline::Link(link),
