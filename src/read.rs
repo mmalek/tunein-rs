@@ -6,7 +6,7 @@ use crate::reader::Reader;
 use std::io::Read;
 
 pub fn read<R: Read>(source: R) -> Result<Document, Error> {
-    let mut document = Document::new();
+    let mut document = Document::default();
 
     let mut outline_stack: Vec<Outline> = vec![];
 

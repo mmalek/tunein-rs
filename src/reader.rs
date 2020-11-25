@@ -107,7 +107,7 @@ fn parse_group(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Outli
 }
 
 fn parse_link(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<OutlineEvent, Error> {
-    let mut link = Link::new();
+    let mut link = Link::default();
     for attr in attributes {
         match &attr.name.local_name as &str {
             "text" => link.text = attr.value.clone(),
@@ -121,7 +121,7 @@ fn parse_link(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Outlin
 }
 
 fn parse_audio(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<OutlineEvent, Error> {
-    let mut audio = Audio::new();
+    let mut audio = Audio::default();
     for attr in attributes {
         match &attr.name.local_name as &str {
             "text" => audio.text = attr.value.clone(),
