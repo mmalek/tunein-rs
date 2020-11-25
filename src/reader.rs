@@ -62,7 +62,7 @@ impl<R: Read> Reader<R> {
     }
 }
 
-fn parse_opml(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Event, Error> {
+fn parse_opml(attributes: &[xml::attribute::OwnedAttribute]) -> Result<Event, Error> {
     attributes
         .iter()
         .find(|ref attr| attr.name.local_name == "version")
@@ -75,7 +75,7 @@ fn parse_opml(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Event,
         .and_then(|version| Ok(Event::StartDocument { version: version }))
 }
 
-fn parse_outline(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Event, Error> {
+fn parse_outline(attributes: &[xml::attribute::OwnedAttribute]) -> Result<Event, Error> {
     attributes
         .iter()
         .find(|ref attr| attr.name.local_name == "type")
@@ -91,7 +91,7 @@ fn parse_outline(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Eve
         .map(Event::StartOutline)
 }
 
-fn parse_group(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<OutlineEvent, Error> {
+fn parse_group(attributes: &[xml::attribute::OwnedAttribute]) -> Result<OutlineEvent, Error> {
     let mut text = String::new();
     let mut key = String::new();
     for attr in attributes {
@@ -107,7 +107,7 @@ fn parse_group(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Outli
     })
 }
 
-fn parse_link(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<OutlineEvent, Error> {
+fn parse_link(attributes: &[xml::attribute::OwnedAttribute]) -> Result<OutlineEvent, Error> {
     let mut link = Link::default();
     for attr in attributes {
         match &attr.name.local_name as &str {
@@ -121,7 +121,7 @@ fn parse_link(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Outlin
     Ok(OutlineEvent::Link(link))
 }
 
-fn parse_audio(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<OutlineEvent, Error> {
+fn parse_audio(attributes: &[xml::attribute::OwnedAttribute]) -> Result<OutlineEvent, Error> {
     let mut audio = Audio::default();
     for attr in attributes {
         match &attr.name.local_name as &str {
