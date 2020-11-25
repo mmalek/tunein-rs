@@ -1,1 +1,1 @@
-pub const BROWSE: &'static str = "http://opml.radiotime.com/Browse.ashx";
+pub const BROWSE: &str = "http://opml.radiotime.com/Browse.ashx";
