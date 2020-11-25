@@ -72,7 +72,7 @@ fn parse_opml(attributes: &[xml::attribute::OwnedAttribute]) -> Result<Event, Er
                 .parse::<u8>()
                 .map_err(|_| Error::InvalidVersionFormat)
         })
-        .and_then(|version| Ok(Event::StartDocument { version: version }))
+        .map(|version| Event::StartDocument { version })
 }
 
 fn parse_outline(attributes: &[xml::attribute::OwnedAttribute]) -> Result<Event, Error> {
