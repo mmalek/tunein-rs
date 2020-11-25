@@ -180,10 +180,7 @@ impl<R: Read> Iterator for Events<R> {
             None
         } else {
             let result = self.reader.next();
-            self.finished = match result {
-                Ok(Event::EndDocument) | Err(_) => true,
-                _ => false,
-            };
+            self.finished = matches!(result, Ok(Event::EndDocument) | Err(_));
             Some(result)
         }
     }
