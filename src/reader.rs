@@ -87,7 +87,8 @@ fn parse_outline(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<Eve
                 _ => Err(Error::InvalidOutlineType),
             },
         )
-        .map(|outline| Event::StartOutline(outline))
+        .map(Box::new)
+        .map(Event::StartOutline)
 }
 
 fn parse_group(attributes: &Vec<xml::attribute::OwnedAttribute>) -> Result<OutlineEvent, Error> {

@@ -10,7 +10,7 @@ pub enum Event {
     EndBody,
     Title(String),
     Status(Option<u32>),
-    StartOutline(OutlineEvent),
+    StartOutline(Box<OutlineEvent>),
     EndOutline,
 }
 

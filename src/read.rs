@@ -22,7 +22,7 @@ pub fn read<R: Read>(source: R) -> Result<Document, Error> {
             }
             Event::Title(title) => document.head.title = title,
             Event::Status(status) => document.head.status = status,
-            Event::StartOutline(outline) => outline_stack.push(outline.into()),
+            Event::StartOutline(outline) => outline_stack.push((*outline).into()),
             Event::EndOutline => {
                 let outline = outline_stack
                     .pop()
