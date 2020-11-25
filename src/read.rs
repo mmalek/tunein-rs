@@ -1,7 +1,7 @@
-use crate::common::*;
+use crate::common::{Document, Group, Outline};
 use crate::error::Error;
-use crate::event::*;
-use crate::reader::*;
+use crate::event::Event;
+use crate::reader::Reader;
 
 use std::io::Read;
 

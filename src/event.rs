@@ -1,4 +1,4 @@
-use crate::common::*;
+use crate::common::{Audio, Group, Link, Outline};
 
 #[derive(Debug, PartialEq)]
 pub enum Event {
@@ -19,4 +19,18 @@ pub enum OutlineEvent {
     Group { text: String, key: String },
     Link(Link),
     Audio(Audio),
+}
+
+impl From<OutlineEvent> for Outline {
+    fn from(outline: OutlineEvent) -> Outline {
+        match outline {
+            OutlineEvent::Group { text, key } => Outline::Group(Group {
+                text: text,
+                key: key,
+                outlines: vec![],
+            }),
+            OutlineEvent::Link(link) => Outline::Link(link),
+            OutlineEvent::Audio(audio) => Outline::Audio(audio),
+        }
+    }
 }

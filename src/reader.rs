@@ -1,6 +1,6 @@
-use crate::common::*;
+use crate::common::{Audio, Format, Link};
 use crate::error::Error;
-use crate::event::*;
+use crate::event::{Event, OutlineEvent};
 use std::io::Read;
 use std::iter::{IntoIterator, Iterator};
 
