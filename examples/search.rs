@@ -1,3 +1,4 @@
+use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use std::error::Error;
 use std::io::Cursor;
 use tokio::stream::StreamExt;
@@ -5,9 +6,13 @@ use tunein::Outline;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let uri = std::env::args()
+    let query = std::env::args()
         .nth(1)
-        .unwrap_or_else(|| tunein::request::BROWSE_URI.to_string());
+        .unwrap_or_else(|| "Kraków".to_string());
+
+    let query = utf8_percent_encode(&query, NON_ALPHANUMERIC);
+
+    let uri = tunein::request::search_uri(&query);
 
     let client = hyper::Client::new();
     let response = client.get(uri.parse()?).await?;

@@ -19,6 +19,7 @@ pub enum OutlineEvent {
     Group { text: String, key: String },
     Link(Link),
     Audio(Audio),
+    Text(String),
 }
 
 impl From<OutlineEvent> for Outline {
@@ -31,6 +32,7 @@ impl From<OutlineEvent> for Outline {
             }),
             OutlineEvent::Link(link) => Outline::Link(link),
             OutlineEvent::Audio(audio) => Outline::Audio(audio),
+            OutlineEvent::Text(text) => Outline::Text(text),
         }
     }
 }

@@ -16,4 +16,5 @@ xml-rs = "~0.3"
 
 [dev-dependencies]
 hyper = "~0.13"
+percent-encoding = "~2.1"
 tokio = { version = "~0.2", features = ["macros", "rt-threaded", "stream"] }

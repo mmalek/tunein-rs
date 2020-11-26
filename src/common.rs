@@ -53,6 +53,7 @@ pub enum Outline {
     Group(Group),
     Link(Link),
     Audio(Audio),
+    Text(String),
 }
 
 #[derive(Debug, PartialEq)]

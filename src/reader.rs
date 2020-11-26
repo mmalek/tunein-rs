@@ -23,7 +23,7 @@ impl<R: Read> Reader<R> {
                     ref name,
                     ref attributes,
                     ..
-                } => match &name.local_name as &str {
+                } => match name.local_name.as_str() {
                     "head" => {
                         return Ok(Event::StartHead);
                     }
@@ -45,7 +45,7 @@ impl<R: Read> Reader<R> {
                     content = s;
                 }
                 xml::reader::XmlEvent::EndElement { ref name } => {
-                    return match &name.local_name as &str {
+                    return match name.local_name.as_str() {
                         "head" => Ok(Event::EndHead),
                         "body" => Ok(Event::EndBody),
                         "title" => Ok(Event::Title(content)),
@@ -81,9 +81,10 @@ fn parse_outline(attributes: &[xml::attribute::OwnedAttribute]) -> Result<Event,
         .find(|ref attr| attr.name.local_name == "type")
         .map_or_else(
             || parse_group(attributes),
-            |outline_type| match &outline_type.value as &str {
+            |outline_type| match outline_type.value.as_str() {
                 "link" => parse_link(attributes),
                 "audio" => parse_audio(attributes),
+                "text" => parse_text(attributes),
                 _ => Err(Error::InvalidOutlineType),
             },
         )
@@ -95,7 +96,7 @@ fn parse_group(attributes: &[xml::attribute::OwnedAttribute]) -> Result<OutlineE
     let mut text = String::new();
     let mut key = String::new();
     for attr in attributes {
-        match &attr.name.local_name as &str {
+        match attr.name.local_name.as_str() {
             "text" => text = attr.value.clone(),
             "key" => key = attr.value.clone(),
             _ => {}
@@ -107,7 +108,7 @@ fn parse_group(attributes: &[xml::attribute::OwnedAttribute]) -> Result<OutlineE
 fn parse_link(attributes: &[xml::attribute::OwnedAttribute]) -> Result<OutlineEvent, Error> {
     let mut link = Link::default();
     for attr in attributes {
-        match &attr.name.local_name as &str {
+        match attr.name.local_name.as_str() {
             "text" => link.text = attr.value.clone(),
             "URL" => link.url = attr.value.clone(),
             "key" => link.key = attr.value.clone(),
@@ -121,7 +122,7 @@ fn parse_link(attributes: &[xml::attribute::OwnedAttribute]) -> Result<OutlineEv
 fn parse_audio(attributes: &[xml::attribute::OwnedAttribute]) -> Result<OutlineEvent, Error> {
     let mut audio = Audio::default();
     for attr in attributes {
-        match &attr.name.local_name as &str {
+        match attr.name.local_name.as_str() {
             "text" => audio.text = attr.value.clone(),
             "subtext" => audio.subtext = attr.value.clone(),
             "URL" => audio.url = attr.value.clone(),
@@ -138,7 +139,7 @@ fn parse_audio(attributes: &[xml::attribute::OwnedAttribute]) -> Result<OutlineE
                     .map_err(|_| Error::InvalidReliabilityFormat)?
             }
             "formats" => {
-                audio.format = match &attr.value as &str {
+                audio.format = match attr.value.as_str() {
                     "mp3" => Format::MP3,
                     _ => Format::Unknown,
                 }
@@ -153,6 +154,15 @@ fn parse_audio(attributes: &[xml::attribute::OwnedAttribute]) -> Result<OutlineE
         }
     }
     Ok(OutlineEvent::Audio(audio))
+}
+
+fn parse_text(attributes: &[xml::attribute::OwnedAttribute]) -> Result<OutlineEvent, Error> {
+    let text = attributes
+        .iter()
+        .find(|&attr| attr.name.local_name == "text")
+        .map(|attr| attr.value.clone())
+        .unwrap_or_default();
+    Ok(OutlineEvent::Text(text))
 }
 
 impl<R: Read> IntoIterator for Reader<R> {
